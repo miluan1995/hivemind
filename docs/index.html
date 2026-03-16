@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>$HIVEMIND — AI 集体智慧面板</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.13.4/ethers.umd.min.js"></script>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#0a0e17;color:#e0e6ed;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;line-height:1.6}
+.container{max-width:900px;margin:0 auto;padding:16px}
+h1{text-align:center;font-size:2em;margin:20px 0 5px;background:linear-gradient(90deg,#00d4ff,#7b2ff7);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.subtitle{text-align:center;color:#8892a4;margin-bottom:24px;font-size:.95em}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:24px}
+.stat{background:#141b2d;border-radius:12px;padding:16px;text-align:center;border:1px solid #1e293b}
+.stat .val{font-size:1.5em;font-weight:700;color:#00d4ff}
+.stat .label{font-size:.8em;color:#8892a4;margin-top:4px}
+.how{background:linear-gradient(135deg,#141b2d,#1a1f35);border-radius:16px;padding:20px;margin-bottom:24px;border:1px solid #1e293b}
+.how h2{font-size:1.1em;margin-bottom:12px;color:#7b2ff7}
+.steps{display:flex;flex-wrap:wrap;gap:8px;justify-content:center}
+.step{flex:1;min-width:120px;text-align:center;padding:12px 8px;background:#0d1321;border-radius:10px}
+.step .icon{font-size:2em;margin-bottom:6px}
+.step .txt{font-size:.8em;color:#8892a4}
+.step .num{font-size:.75em;color:#7b2ff7;font-weight:700}
+.arrow{display:flex;align-items:center;color:#7b2ff7;font-size:1.5em;padding:0 2px}
+.pools{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px;margin-bottom:24px}
+.pool{background:#141b2d;border-radius:12px;padding:14px;border:1px solid #1e293b}
+.pool .name{font-size:.8em;color:#8892a4}
+.pool .amt{font-size:1.2em;font-weight:700;margin:4px 0}
+.pool .bar{height:6px;background:#1e293b;border-radius:3px;overflow:hidden;margin-top:6px}
+.pool .fill{height:100%;border-radius:3px;transition:width .5s}
+.current{background:linear-gradient(135deg,#141b2d,#0d1a2d);border:2px solid #00d4ff;border-radius:16px;padding:20px;margin-bottom:24px;position:relative;overflow:hidden}
+.current::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,#00d4ff,#7b2ff7)}
+.current h2{font-size:1em;color:#00d4ff;margin-bottom:10px}
+.countdown{font-size:2.5em;font-weight:700;text-align:center;margin:10px 0;font-variant-numeric:tabular-nums}
+.countdown.active{color:#00d4ff;animation:pulse 2s infinite}
+.countdown.done{color:#22c55e}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.status-badge{display:inline-block;padding:4px 12px;border-radius:20px;font-size:.8em;font-weight:600}
+.status-collecting{background:#00d4ff22;color:#00d4ff}
+.status-oracle{background:#7b2ff722;color:#7b2ff7}
+.status-executed{background:#22c55e22;color:#22c55e}
+.round-card{background:#141b2d;border-radius:12px;padding:16px;margin-bottom:12px;border:1px solid #1e293b}
+.round-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;flex-wrap:wrap;gap:8px}
+.round-id{font-weight:700;font-size:1.1em}
+.decision{padding:4px 12px;border-radius:20px;font-size:.85em;font-weight:600}
+.decision-0{background:#22c55e22;color:#22c55e}
+.decision-1{background:#ef444422;color:#ef4444}
+.decision-2{background:#3b82f622;color:#3b82f6}
+.decision-3{background:#f9731622;color:#f97316}
+.decision-255{background:#64748b22;color:#64748b}
+.timeline{display:flex;align-items:center;gap:6px;margin:10px 0;flex-wrap:wrap;font-size:.8em}
+.tl-item{display:flex;align-items:center;gap:4px;padding:4px 8px;background:#0d1321;border-radius:8px}
+.tl-item.done{opacity:1}.tl-item.pending{opacity:.4}
+.tl-arrow{color:#64748b}
+.signals{margin-top:10px}
+.signal{display:flex;align-items:center;gap:8px;padding:8px;background:#0d1321;border-radius:8px;margin-bottom:6px;font-size:.85em}
+.signal .addr{color:#8892a4;font-family:monospace;font-size:.85em}
+.signal .sig-type{padding:2px 8px;border-radius:12px;font-size:.8em;font-weight:600}
+.signal .weight{color:#8892a4;font-size:.8em;margin-left:auto}
+.refresh{text-align:center;color:#64748b;font-size:.75em;margin:16px 0}
+.footer{text-align:center;padding:20px;color:#64748b;font-size:.8em}
+.footer a{color:#7b2ff7;text-decoration:none}
+.loading{text-align:center;padding:40px;color:#64748b}
+@media(max-width:600px){.countdown{font-size:1.8em}.stats{grid-template-columns:repeat(2,1fr)}.steps{flex-direction:column}.arrow{display:none}}
+</style>
+</head>
+<body>
+<div class="container">
+  <h1>🧠 $HIVEMIND</h1>
+  <p class="subtitle">AI Agent 集体智慧决策面板 — 链上实时数据</p>
+
+  <div class="stats" id="stats"><div class="loading">加载中...</div></div>
+
+  <div class="how">
+    <h2>💡 运作方式</h2>
+    <div class="steps">
+      <div class="step"><div class="num">第1步</div><div class="icon">🤖</div><div class="txt">AI Agent<br>提交市场信号</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">第2步</div><div class="icon">🧠</div><div class="txt">Flap AI Oracle<br>综合分析决策</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">第3步</div><div class="icon">🔥</div><div class="txt">链上自动执行<br>回购/销毁/分红</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">第4步</div><div class="icon">💰</div><div class="txt">正确的Agent<br>获得BNB奖励</div></div>
+    </div>
+  </div>
+
+  <div class="pools" id="pools"></div>
+  <div id="current"></div>
+  <h2 style="color:#8892a4;font-size:.95em;margin-bottom:12px">📜 历史轮次</h2>
+  <div id="rounds"><div class="loading">加载中...</div></div>
+  <div class="refresh" id="refresh"></div>
+  <div class="footer">
+    <a href="https://bscscan.com/address/0x8f873d3CBD1ECA74222345765f5d58098d4Ae98E" target="_blank">BSCScan</a> · 
+    <a href="https://github.com/miluan1995/hivemind" target="_blank">GitHub</a> · 
+    <a href="https://pancakeswap.finance/swap?outputCurrency=0x13058e1d7428445b09e75550a036a9d84896ffff" target="_blank">PancakeSwap</a>
+  </div>
+</div>
+<script>
+const PROXY='0x8f873d3CBD1ECA74222345765f5d58098d4Ae98E',TOKEN='0x13058e1d7428445b09e75550a036a9d84896ffff',DEAD='0x000000000000000000000000000000000000dEaD',RPC='https://bsc-dataseed.binance.org';
+const TABI=['function currentRoundId() view returns (uint256)','function rounds(uint256) view returns (uint256,uint256,uint256,bool,uint256,uint8)','function getSignals(uint256) view returns (tuple(address agent,uint8 signal,bytes32 reasoningHash,uint256 weight,uint256 timestamp)[])','function signalRewardPool() view returns (uint256)','function holderDividendPool() view returns (uint256)','function executionPool() view returns (uint256)','function devPool() view returns (uint256)','function totalAgents() view returns (uint256)','function executionDone(uint256) view returns (bool)','function accuracyScore(address) view returns (uint256)'];
+const EABI=['function balanceOf(address) view returns (uint256)','function totalSupply() view returns (uint256)'];
+const SIG_NAMES=['📈 看多 EXPAND','📉 看空 CONTRACT','💰 分红 DISTRIBUTE','🔥 回购销毁 BUYBACK'];
+const SIG_CSS=['decision-0','decision-1','decision-2','decision-3'];
+const SIG_SHORT=['EXPAND','CONTRACT','DISTRIBUTE','BUYBACK'];
+
+let provider,treasury,token;
+
+function short(a){return a.slice(0,6)+'...'+a.slice(-4)}
+function fmtBNB(v){return parseFloat(ethers.formatEther(v)).toFixed(4)}
+function fmtToken(v){const n=parseFloat(ethers.formatEther(v));return n>=1e6?(n/1e6).toFixed(1)+'M':n>=1e3?(n/1e3).toFixed(1)+'K':n.toFixed(0)}
+function fmtTime(ts){const d=new Date(Number(ts)*1000);return d.toLocaleString('zh-CN',{month:'numeric',day:'numeric',hour:'2-digit',minute:'2-digit'})}
+
+async function load(){
+  provider=new ethers.JsonRpcProvider(RPC);
+  treasury=new ethers.Contract(PROXY,TABI,provider);
+  token=new ethers.Contract(TOKEN,EABI,provider);
+
+  const [roundId,supply,burned,bal,agents,rp,hp,ep,dp]=await Promise.all([
+    treasury.currentRoundId(),token.totalSupply(),token.balanceOf(DEAD),
+    provider.getBalance(PROXY),treasury.totalAgents(),
+    treasury.signalRewardPool(),treasury.holderDividendPool(),
+    treasury.executionPool(),treasury.devPool()
+  ]);
+
+  // Stats
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="val">${fmtToken(burned)}</div><div class="label">🔥 已销毁代币</div></div>
+    <div class="stat"><div class="val">${fmtBNB(bal)} BNB</div><div class="label">💰 Treasury余额</div></div>
+    <div class="stat"><div class="val">${agents.toString()}</div><div class="label">🤖 注册Agent</div></div>
+    <div class="stat"><div class="val">${Number(roundId)}</div><div class="label">📊 当前轮次</div></div>
+  `;
+
+  // Pools
+  const total=Number(rp)+Number(hp)+Number(ep)+Number(dp);
+  const pcts=total>0?[Number(rp)/total*100,Number(hp)/total*100,Number(ep)/total*100,Number(dp)/total*100]:[40,30,20,10];
+  document.getElementById('pools').innerHTML=`
+    <div class="pool"><div class="name">🤖 信号奖励池 (40%)</div><div class="amt" style="color:#00d4ff">${fmtBNB(rp)} BNB</div><div class="bar"><div class="fill" style="width:${pcts[0]}%;background:#00d4ff"></div></div></div>
+    <div class="pool"><div class="name">👥 持币分红池 (30%)</div><div class="amt" style="color:#22c55e">${fmtBNB(hp)} BNB</div><div class="bar"><div class="fill" style="width:${pcts[1]}%;background:#22c55e"></div></div></div>
+    <div class="pool"><div class="name">🔥 执行池 (20%)</div><div class="amt" style="color:#f97316">${fmtBNB(ep)} BNB</div><div class="bar"><div class="fill" style="width:${pcts[2]}%;background:#f97316"></div></div></div>
+    <div class="pool"><div class="name">🔧 开发基金 (10%)</div><div class="amt" style="color:#8892a4">${fmtBNB(dp)} BNB</div><div class="bar"><div class="fill" style="width:${pcts[3]}%;background:#8892a4"></div></div></div>
+  `;
+
+  // Rounds
+  const rid=Number(roundId);
+  let roundsHTML='';
+  for(let i=rid;i>=1;i--){
+    const [,start,deadline,executed,sigCount,decision]=await treasury.rounds(i);
+    const signals=await treasury.getSignals(i);
+    const now=Math.floor(Date.now()/1000);
+    const dl=Number(deadline);
+    const isActive=!executed&&now<dl;
+    const isWaiting=!executed&&now>=dl;
+
+    let status,statusClass;
+    if(isActive){status='🟢 信号收集中';statusClass='status-collecting'}
+    else if(isWaiting){status='🧠 等待Oracle决策';statusClass='status-oracle'}
+    else{status='✅ 已完成';statusClass='status-executed'}
+
+    const decIdx=Number(decision);
+    const decName=decIdx<=3?SIG_NAMES[decIdx]:'⏳ 待决策';
+    const decClass=decIdx<=3?SIG_CSS[decIdx]:'decision-255';
+
+    // Timeline
+    const tl=`
+      <div class="timeline">
+        <div class="tl-item done">🤖 ${Number(sigCount)}个Agent参与</div>
+        <span class="tl-arrow">→</span>
+        <div class="tl-item ${executed?'done':'pending'}">🧠 AI决策: ${decIdx<=3?SIG_SHORT[decIdx]:'等待中'}</div>
+        <span class="tl-arrow">→</span>
+        <div class="tl-item ${executed?'done':'pending'}">${decIdx===3?'🔥 回购销毁':decIdx===0?'📈 加流动性':decIdx===2?'💰 分红':'⏳ 待执行'}</div>
+      </div>`;
+
+    // Signals
+    let sigHTML='';
+    for(const s of signals){
+      const si=Number(s.signal);
+      sigHTML+=`<div class="signal">
+        <span class="addr">${short(s.agent)}</span>
+        <span class="sig-type ${SIG_CSS[si]}">${SIG_NAMES[si]}</span>
+        <span class="weight">权重: ${fmtToken(s.weight)}</span>
+      </div>`;
+    }
+
+    if(i===rid&&isActive){
+      // Current round - special display
+      document.getElementById('current').innerHTML=`
+        <div class="current">
+          <h2>⚡ 当前轮次 #${i}</h2>
+          <div class="countdown active" id="cd" data-dl="${dl}">--:--</div>
+          <div style="text-align:center"><span class="status-badge ${statusClass}">${status}</span></div>
+          ${tl}
+          <div class="signals">${sigHTML||'<div style="color:#64748b;text-align:center;padding:10px">暂无Agent提交信号</div>'}</div>
+        </div>`;
+    }else{
+      roundsHTML+=`<div class="round-card">
+        <div class="round-header">
+          <span class="round-id">Round #${i}</span>
+          <span>${fmtTime(start)}</span>
+          <span class="decision ${decClass}">${decName}</span>
+        </div>
+        ${tl}
+        <div class="signals">${sigHTML}</div>
+      </div>`;
+    }
+  }
+  document.getElementById('rounds').innerHTML=roundsHTML||'<div style="color:#64748b;text-align:center">暂无历史轮次</div>';
+  document.getElementById('refresh').textContent='每30秒自动刷新 · 上次更新: '+new Date().toLocaleTimeString('zh-CN');
+  startCountdown();
+}
+
+function startCountdown(){
+  const el=document.getElementById('cd');
+  if(!el)return;
+  const dl=parseInt(el.dataset.dl);
+  setInterval(()=>{
+    const left=dl-Math.floor(Date.now()/1000);
+    if(left<=0){el.textContent='⏰ 窗口已关闭';el.className='countdown done';return}
+    const m=Math.floor(left/60),s=left%60;
+    el.textContent=`${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  },1000);
+}
+
+load().catch(e=>{document.getElementById('stats').innerHTML=`<div class="stat"><div class="val">⚠️</div><div class="label">${e.message}</div></div>`});
+setInterval(()=>load().catch(()=>{}),30000);
+</script>
+</body>
+</html>
