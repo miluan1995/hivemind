@@ -243,7 +243,7 @@ contract HiveMindTreasury is VaultBase, FlapAIConsumerBase {
 
     function _fulfillReasoning(uint256 requestId, uint8 choice) internal override {
         require(requestId == _lastReqId, "bad id");
-        require(choice <= 3, "bad choice");
+        if (choice > 3) choice = 0;
         _lastReqId = 0;
         uint256 roundId = requestToRound[requestId];
         delete requestToRound[requestId];
@@ -252,11 +252,17 @@ contract HiveMindTreasury is VaultBase, FlapAIConsumerBase {
         round.finalDecision = choice;
         roundEndPrice[roundId] = _tokenPrice();
         _updateAccuracy(roundId);
+        emit RoundExecuted(roundId, choice);
+    }
+
+    function manualExecute(uint256 roundId) external {
+        Round storage round = rounds[roundId];
+        require(round.executed, "not decided");
+        uint8 choice = round.finalDecision;
         if (choice == 0) _executeExpand();
         else if (choice == 1) _executeContract();
         else if (choice == 2) _executeDistribute();
         else _executeBuybackBurn();
-        emit RoundExecuted(roundId, choice);
     }
 
     function _onFlapAIRequestRefunded(uint256 requestId) internal override { require(requestId == _lastReqId, "bad id"); delete requestToRound[requestId]; _lastReqId = 0; }
