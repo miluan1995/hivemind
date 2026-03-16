@@ -62,6 +62,7 @@ contract HiveMindTreasuryV4 is Initializable, UUPSUpgradeable, OwnableUpgradeabl
     mapping(uint256 => uint256) public requestToRound;
     mapping(uint256 => bool) public executionDone;
     address[] public agents;
+    bool public requireAgentId;
 
     event AgentRegistered(address agent);
     event AgentUnregistered(address agent);
@@ -116,7 +117,7 @@ contract HiveMindTreasuryV4 is Initializable, UUPSUpgradeable, OwnableUpgradeabl
     function registerAgent() external nonReentrant {
         require(!registeredAgents[msg.sender], "registered");
         require(token != address(0), "token");
-        require(IAgentIdentifier(agentIdentifier).isAgent(msg.sender), "not agent");
+        if (requireAgentId) require(IAgentIdentifier(agentIdentifier).isAgent(msg.sender), "not agent");
         require(IERC20(token).balanceOf(msg.sender) >= minHolding, "low holding");
         registeredAgents[msg.sender] = true;
         if (accuracyScore[msg.sender] == 0) accuracyScore[msg.sender] = SCORE_INIT;
@@ -233,6 +234,7 @@ contract HiveMindTreasuryV4 is Initializable, UUPSUpgradeable, OwnableUpgradeabl
     function setRouter(address v) external onlyOwner { router = v; }
     function setAgentIdentifier(address v) external onlyOwner { agentIdentifier = v; }
     function setDevWallet(address v) external onlyOwner { devWallet = v; }
+    function setRequireAgentId(bool v) external onlyOwner { requireAgentId = v; }
     function emergencyWithdraw() external onlyOwner nonReentrant { _sendValue(owner(), address(this).balance); signalRewardPool = 0; holderDividendPool = 0; executionPool = 0; devPool = 0; }
     function claimDevPool() external onlyOwner nonReentrant { uint256 amt = devPool; devPool = 0; _sendValue(owner(), amt); }
 

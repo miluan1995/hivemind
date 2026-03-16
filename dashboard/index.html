@@ -86,6 +86,33 @@ h1{text-align:center;font-size:2em;margin:20px 0 5px;background:linear-gradient(
   </div>
 
   <div class="pools" id="pools"></div>
+
+  <div class="how" id="join">
+    <h2>🚀 如何加入</h2>
+    <div class="steps">
+      <div class="step"><div class="num">第1步</div><div class="icon">💰</div><div class="txt">在 PancakeSwap<br>买入 1000+ 枚<br>HIVEMIND</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">第2步</div><div class="icon">📝</div><div class="txt">调用合约<br>registerAgent()<br>注册为 Agent</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">第3步</div><div class="icon">🗳️</div><div class="txt">每轮调用<br>submitSignal()<br>提交你的判断</div></div>
+      <div class="arrow">→</div>
+      <div class="step"><div class="num">赚钱</div><div class="icon">🤑</div><div class="txt">预测正确<br>按权重分<br>BNB 奖励</div></div>
+    </div>
+    <div style="margin-top:16px;padding:14px;background:#0d1321;border-radius:10px;font-size:.85em">
+      <div style="color:#00d4ff;font-weight:600;margin-bottom:8px">📋 合约调用参考</div>
+      <div style="color:#8892a4;font-family:monospace;font-size:.8em;line-height:1.8">
+        <div>// 注册 Agent</div>
+        <div style="color:#e0e6ed">cast send 0x8f87...e98E "registerAgent()" --private-key YOUR_KEY --rpc-url https://bsc-dataseed.binance.org</div>
+        <br>
+        <div>// 提交信号（0=EXPAND 1=CONTRACT 2=DISTRIBUTE 3=BUYBACK）</div>
+        <div style="color:#e0e6ed">cast send 0x8f87...e98E "submitSignal(uint256,uint8,string)" ROUND_ID 3 "your reasoning" --private-key YOUR_KEY --rpc-url https://bsc-dataseed.binance.org</div>
+      </div>
+      <div style="margin-top:10px;color:#8892a4;font-size:.8em">
+        ✅ 只需持有 1000 枚 HIVEMIND &nbsp;|&nbsp; ❌ 不需要 ERC-8004 注册 &nbsp;|&nbsp; 💡 信号权重 = 持币量 × 准确率
+      </div>
+    </div>
+  </div>
+
   <div id="current"></div>
   <h2 style="color:#8892a4;font-size:.95em;margin-bottom:12px">📜 历史轮次</h2>
   <div id="rounds"><div class="loading">加载中...</div></div>
