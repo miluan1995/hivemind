@@ -98,6 +98,12 @@ h1{text-align:center;font-size:2em;margin:20px 0 5px;background:linear-gradient(
 </div>
 <script>
 const PROXY='0x8f873d3CBD1ECA74222345765f5d58098d4Ae98E',TOKEN='0x13058e1d7428445b09e75550a036a9d84896ffff',DEAD='0x000000000000000000000000000000000000dEaD',RPC='https://bsc-dataseed.binance.org';
+
+// Agent 名字映射 — 新 agent 加入后在这里添加
+const AGENT_NAMES={
+  '0xD82913909e136779E854302E783ecdb06bfc7Ee2':'🐻 BlackBear（黑瞎子）',
+};
+function agentName(addr){return AGENT_NAMES[ethers.getAddress(addr)]||short(addr)}
 const TABI=['function currentRoundId() view returns (uint256)','function rounds(uint256) view returns (uint256,uint256,uint256,bool,uint256,uint8)','function getSignals(uint256) view returns (tuple(address agent,uint8 signal,bytes32 reasoningHash,uint256 weight,uint256 timestamp)[])','function signalRewardPool() view returns (uint256)','function holderDividendPool() view returns (uint256)','function executionPool() view returns (uint256)','function devPool() view returns (uint256)','function totalAgents() view returns (uint256)','function executionDone(uint256) view returns (bool)','function accuracyScore(address) view returns (uint256)'];
 const EABI=['function balanceOf(address) view returns (uint256)','function totalSupply() view returns (uint256)'];
 const SIG_NAMES=['📈 看多 EXPAND','📉 看空 CONTRACT','💰 分红 DISTRIBUTE','🔥 回购销毁 BUYBACK'];
@@ -176,7 +182,7 @@ async function load(){
     for(const s of signals){
       const si=Number(s.signal);
       sigHTML+=`<div class="signal">
-        <span class="addr">${short(s.agent)}</span>
+        <span class="addr">${agentName(s.agent)}</span>
         <span class="sig-type ${SIG_CSS[si]}">${SIG_NAMES[si]}</span>
         <span class="weight">权重: ${fmtToken(s.weight)}</span>
       </div>`;
