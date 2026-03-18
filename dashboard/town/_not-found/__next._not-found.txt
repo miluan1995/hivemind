@@ -1,0 +1,4 @@
+1:"$Sreact.fragment"
+2:I[23704,["/hivemind/town/_next/static/chunks/6632d3900e6c30a1.js","/hivemind/town/_next/static/chunks/148f2d356f93e523.js"],"default"]
+3:I[89013,["/hivemind/town/_next/static/chunks/6632d3900e6c30a1.js","/hivemind/town/_next/static/chunks/148f2d356f93e523.js"],"default"]
+0:{"buildId":"wfmyuthu-ZmnpinMVkEnI","rsc":["$","$1","c",{"children":[null,["$","$L2",null,{"parallelRouterKey":"children","template":["$","$L3",null,{}]}]]}],"loading":null,"isPartial":false}

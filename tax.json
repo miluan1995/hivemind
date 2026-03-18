@@ -1,0 +1,11 @@
+{
+  "tokenTaxInfo": {
+    "feeRate": 3,
+    "burnRate": 0,
+    "divideRate": 0,
+    "liquidityRate": 0,
+    "recipientRate": 100,
+    "recipientAddress": "0x6A55554c53b5d23931057f88EfCDE846Dc2968ac",
+    "minSharing": 100000
+  }
+}

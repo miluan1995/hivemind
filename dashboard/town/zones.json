@@ -1,0 +1,74 @@
+[
+  {
+    "name": "MeetingHall",
+    "label": "\ud83d\udcdc \u8bae\u4e8b\u5385",
+    "x": 3,
+    "y": 3,
+    "w": 8,
+    "h": 8,
+    "center": [
+      336,
+      360
+    ]
+  },
+  {
+    "name": "Garden",
+    "label": "\ud83c\udf38 \u82b1\u56ed",
+    "x": 26,
+    "y": 2,
+    "w": 10,
+    "h": 10,
+    "center": [
+      1440,
+      360
+    ]
+  },
+  {
+    "name": "Plaza",
+    "label": "\u26f2 \u4e2d\u592e\u5e7f\u573a",
+    "x": 15,
+    "y": 11,
+    "w": 10,
+    "h": 8,
+    "center": [
+      912,
+      552
+    ]
+  },
+  {
+    "name": "Exchange",
+    "label": "\ud83d\udcb0 \u4ea4\u6613\u6240",
+    "x": 2,
+    "y": 19,
+    "w": 12,
+    "h": 8,
+    "center": [
+      336,
+      912
+    ]
+  },
+  {
+    "name": "FishingPond",
+    "label": "\ud83c\udfa3 \u9493\u9c7c\u5858",
+    "x": 27,
+    "y": 19,
+    "w": 11,
+    "h": 9,
+    "center": [
+      1560,
+      1080
+    ]
+  },
+  {
+    "name": "Arena",
+    "label": "\u2694\ufe0f \u7ade\u6280\u573a",
+    "x": 15,
+    "y": 19,
+    "w": 8,
+    "h": 8,
+    "center": [
+      912,
+      912
+    ]
+  }
+]
